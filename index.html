@@ -170,8 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Configuración Supabase ---
   const SUPABASE_URL = 'https://xarfnkjrynrlagqbzapb.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhcmZua2pyeW5ybGFncWJ6YXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0ODUwNTYsImV4cCI6MjA4MTA2MTA1Nn0.XSeaEKlaz7LDFpZt9O1OC0EVQ-W7BFIy3SKtuIg5h1E';
-  
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // --- FIX Supabase: crear cliente de forma segura ---
+  const SupabaseGlobal = window.supabase || window.Supabase || window.supabaseJs || null;
+  if (!SupabaseGlobal || typeof SupabaseGlobal.createClient !== 'function') {
+    console.error('SDK de Supabase no cargado o exportación inesperada. Revisa la URL del script.');
+  }
+  const supabase = SupabaseGlobal.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   // --- DOM references ---
   const loginScreen = document.getElementById('loginScreen');
   const registroScreen = document.getElementById('registroScreen');
