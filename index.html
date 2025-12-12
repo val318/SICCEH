@@ -5,34 +5,20 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SICCE – ENCB</title>
   <style>
-    :root{
-      --primary:#7a003c; --primary-dark:#5a002d; --bg:#f4f4f4; --card:#fff; --text:#222;
-    }
-    [data-theme="dark"]{
-      --bg:#0f1112; --card:#121212; --text:#eee;
-    }
+    :root{--primary:#7a003c;--primary-dark:#5a002d;--bg:#f4f4f4;--card:#fff;--text:#222;}
+    [data-theme="dark"]{--bg:#0f1112;--card:#121212;--text:#eee;}
     *{box-sizing:border-box}
-    body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
     header{background:var(--primary);color:#fff;padding:18px;text-align:center}
-    main{max-width:1100px;margin:20px auto;padding:18px;display:none}
     .card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-    input,select,button,textarea{font-family:inherit;font-size:15px}
-    input,select,textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc;background:transparent;color:var(--text)}
-    button{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+    input,button{font-family:inherit;font-size:15px;width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc;background:transparent;color:var(--text)}
+    button{background:var(--primary);color:#fff;border:none;cursor:pointer}
     button:hover{background:var(--primary-dark)}
-    nav{display:none;background:var(--card);padding:12px;border-radius:10px;margin:0 auto 18px;max-width:1100px;align-items:center;display:flex}
-    nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:600}
     .small{font-size:13px;color:gray;margin-top:8px}
-    .table-wrap{overflow:auto;max-height:380px;margin-top:12px}
-    .table{width:100%;border-collapse:collapse}
-    .table th,.table td{padding:8px;border-bottom:1px solid rgba(0,0,0,.08);font-size:14px;text-align:left}
-    .profile-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:20px}
-    .profile-modal .card{width:360px;max-width:95%}
-    .pulse{animation:pop .6s ease}
-    @keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
   </style>
 </head>
 <body>
+
 <header>
   <h1>SICCE — Sistema Integral de Captura de Colillas</h1>
   <p class="small">ENCB · Proyecto de recolección y biodegradación</p>
@@ -62,204 +48,92 @@
   <p id="regMsg" class="small"></p>
 </section>
 
-<!-- NAV -->
-<nav id="menu" style="display:none">
-  <a href="#intro">Introducción</a>
-  <a href="#registro">Registrar</a>
-  <a href="#impacto">Impacto</a>
-  <a href="#historial">Historial</a>
-  <a href="#adminPanel" id="adminBtn" style="display:none">Administración</a>
-  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <button id="btnTheme">Modo oscuro</button>
-    <button id="btnProfile">Perfil</button>
-    <button id="btnLogout">Salir</button>
-  </div>
-</nav>
-
-<!-- MAIN -->
-<main id="contenido" style="display:none">
-  <section id="intro" class="card">
-    <h2>Introducción</h2>
-    <p>Sistema SICCE para recolección y biodegradación de colillas: registro, historial, recompensas y administración.</p>
-  </section>
-
-  <section id="registro" class="card">
-    <h2>Registrar colillas</h2>
-    <p id="userLabel" class="small"></p>
-    <input id="colillasInput" type="number" placeholder="Cantidad de colillas">
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button id="btnSaveColillas">Guardar</button>
-      <button id="btnGenerateQR">Generar QR</button>
-    </div>
-    <p id="saveMsg" class="small"></p>
-    <h3>Total acumulado: <span id="totalUser">0</span></h3>
-    <div id="chartContainer" style="max-width:700px"><canvas id="chartCanvas"></canvas></div>
-  </section>
-
-  <section id="impacto" class="card">
-    <h2>Impacto</h2>
-    <p>Nivel: <span id="badgeLevel">0</span> — Rango: <span id="badgeRank">Principiante</span></p>
-  </section>
-
-  <section id="historial" class="card">
-    <h2>Historial de depósitos</h2>
-    <label>Eliminar por fecha (usuario):</label>
-    <input type="date" id="delDate" style="margin-top:8px">
-    <button id="btnDeleteByDate" style="margin-top:8px">Eliminar por fecha</button>
-    <ul id="historialLista" class="small" style="margin-top:14px"></ul>
-  </section>
-
-  <section id="adminPanel" class="card" style="display:none">
-    <h2>Panel de Administración</h2>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <label style="min-width:140px">Seleccionar usuario:</label>
-      <select id="adminUserSelect" style="flex:1"></select>
-    </div>
-    <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-      <input type="date" id="adminDelDate">
-      <button id="btnAdminDeleteByDate">Borrar historial por fecha</button>
-      <button id="btnAdminDeleteAll">Borrar todo historial</button>
-    </div>
-
-    <hr style="margin:12px 0">
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button id="btnRefreshAdmin">Actualizar</button>
-      <button id="btnExportCSV">Exportar CSV</button>
-      <button id="btnResetAll">Reiniciar todo</button>
-    </div>
-
-    <div id="adminList" class="table-wrap" style="margin-top:12px"></div>
-  </section>
-</main>
-
-<!-- Profile modal -->
-<div class="profile-modal" id="profileModal">
-  <div class="card">
-    <h3>Perfil</h3>
-    <p id="pEmail"></p>
-    <p id="pColillas"></p>
-    <p id="pNivel"></p>
-    <div style="display:flex;justify-content:flex-end;margin-top:12px">
-      <button id="btnCloseProfile">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- QR modal -->
-<div class="profile-modal" id="qrModal">
-  <div class="card center">
-    <h3>QR para contenedor</h3>
-    <img id="qrImg" alt="QR" style="width:220px;height:220px">
-    <div style="display:flex;justify-content:center;gap:8px;margin-top:12px">
-      <button id="btnDownloadQR">Descargar</button>
-      <button id="btnCloseQR">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- ESM Supabase -->
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.32.0';
 
   const SUPABASE_URL = 'https://xarfnkjrynrlagqbzapb.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhcmZua2pyeW5ybGFncWJ6YXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0ODUwNTYsImV4cCI6MjA4MTA2MTA1Nn0.XSeaEKlaz7LDFpZt9O1OC0EVQ-W7BFIy3SKtuIg5h1E';
-
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('Supabase inicializado correctamente:', !!supabase);
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const loginScreen = document.getElementById('loginScreen');
-    const registroScreen = document.getElementById('registroScreen');
-    const menu = document.getElementById('menu');
-    const contenido = document.getElementById('contenido');
+  const loginScreen = document.getElementById('loginScreen');
+  const registroScreen = document.getElementById('registroScreen');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPass = document.getElementById('loginPass');
+  const loginMsg = document.getElementById('loginMsg');
+  const regEmail = document.getElementById('regEmail');
+  const regPass = document.getElementById('regPass');
+  const regMsg = document.getElementById('regMsg');
+  const btnLogin = document.getElementById('btnLogin');
+  const btnShowRegister = document.getElementById('btnShowRegister');
+  const btnRegister = document.getElementById('btnRegister');
+  const btnCancelRegister = document.getElementById('btnCancelRegister');
 
-    const loginEmail = document.getElementById('loginEmail');
-    const loginPass = document.getElementById('loginPass');
-    const loginMsg = document.getElementById('loginMsg');
+  function sessionUserId(){ return sessionStorage.getItem('user_id'); }
 
-    const regEmail = document.getElementById('regEmail');
-    const regPass = document.getElementById('regPass');
-    const regMsg = document.getElementById('regMsg');
+  async function fetchProfile(user_id){
+    if(!user_id) return null;
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user_id).single();
+    if(error) return null;
+    return data;
+  }
 
-    const btnLogin = document.getElementById('btnLogin');
-    const btnShowRegister = document.getElementById('btnShowRegister');
-    const btnRegister = document.getElementById('btnRegister');
-    const btnCancelRegister = document.getElementById('btnCancelRegister');
-
-    function sessionUserId(){ return sessionStorage.getItem('user_id'); }
-
-    async function fetchProfile(user_id){
-      if(!user_id) return null;
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', user_id).single();
-      if(error) return null;
-      return data;
-    }
-
-    async function login(){
-      const email = loginEmail.value.trim();
-      const pass = loginPass.value;
-      loginMsg.textContent = '';
-      if(!email || !pass){ loginMsg.textContent='Completa los campos'; return; }
+  async function login(){
+    loginMsg.textContent='';
+    const email = loginEmail.value.trim();
+    const pass = loginPass.value.trim();
+    if(!email || !pass){ loginMsg.textContent='Completa los campos'; return; }
+    try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
-      if(error){ loginMsg.textContent = error.message; return; }
+      if(error){ loginMsg.textContent=error.message; return; }
       const user = data.user || data.session?.user;
       if(!user){ loginMsg.textContent='No se pudo iniciar sesión'; return; }
       sessionStorage.setItem('user_id', user.id);
       sessionStorage.setItem('user_email', user.email || '');
-      iniciarSistema();
+      loginMsg.textContent='Login exitoso';
+      // Aquí podrías redirigir o mostrar el main
+    } catch(err){
+      console.error(err);
+      loginMsg.textContent='Error inesperado al iniciar sesión';
     }
+  }
 
-    async function registrarUsuario(){
-      const email = regEmail.value.trim();
-      const pass = regPass.value;
-      regMsg.textContent='';
-      if(!email || !pass){ regMsg.textContent='Completa los campos'; return; }
+  async function registrarUsuario(){
+    regMsg.textContent='';
+    const email = regEmail.value.trim();
+    const pass = regPass.value.trim();
+    if(!email || !pass){ regMsg.textContent='Completa los campos'; return; }
+    if(pass.length < 6){ regMsg.textContent='La contraseña debe tener al menos 6 caracteres'; return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailRegex.test(email)){ regMsg.textContent='Correo inválido'; return; }
+
+    try{
       const { data, error } = await supabase.auth.signUp({ email, password: pass });
-      if(error){ regMsg.textContent = error.message; return; }
+      if(error){
+        if(error.status===422) regMsg.textContent='Correo inválido o contraseña no válida';
+        else if(error.status===500) regMsg.textContent='Error del servidor, intenta más tarde';
+        else regMsg.textContent=error.message;
+        return;
+      }
       const userId = data.user?.id || data.session?.user?.id;
       if(userId){
-        await supabase.from('profiles').insert({ id: userId, email, rango: 'Principiante', colillas: 0 });
+        await supabase.from('profiles').insert({ id:userId, email, rango:'Principiante', colillas:0 });
       }
       regMsg.textContent='Cuenta creada correctamente';
       setTimeout(()=>{
         registroScreen.style.display='none';
         loginScreen.style.display='block';
-        loginEmail.value = email;
+        loginEmail.value=email;
       },900);
+    } catch(err){
+      console.error(err);
+      regMsg.textContent='Error inesperado al crear cuenta';
     }
+  }
 
-    async function iniciarSistema(){
-      loginScreen.style.display='none';
-      registroScreen.style.display='none';
-      menu.style.display='flex';
-      contenido.style.display='block';
-      const uid = sessionUserId();
-      const profile = await fetchProfile(uid);
-    }
-
-    btnShowRegister.addEventListener('click', ()=>{ loginScreen.style.display='none'; registroScreen.style.display='block'; });
-    btnCancelRegister.addEventListener('click', ()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; });
-    btnRegister.addEventListener('click', registrarUsuario);
-    btnLogin.addEventListener('click', login);
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if(session && session.user){
-        sessionStorage.setItem('user_id', session.user.id);
-        sessionStorage.setItem('user_email', session.user.email || '');
-        iniciarSistema();
-      } else {
-        loginScreen.style.display='block';
-        registroScreen.style.display='none';
-        menu.style.display='none';
-        contenido.style.display='none';
-      }
-    });
-  });
+  btnLogin.addEventListener('click', login);
+  btnShowRegister.addEventListener('click', ()=>{ loginScreen.style.display='none'; registroScreen.style.display='block'; });
+  btnRegister.addEventListener('click', registrarUsuario);
+  btnCancelRegister.addEventListener('click', ()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; });
 </script>
 </body>
 </html>
