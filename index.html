@@ -15,8 +15,7 @@
 body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
 header{background:var(--primary);color:#fff;padding:18px;text-align:center}
 main{max-width:1100px;margin:20px auto;padding:18px;display:none}
-.card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform 0.2s;}
-.card:hover{transform:translateY(-3px);}
+.card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 input,select,button,textarea{font-family:inherit;font-size:15px}
 input,select,textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc;background:transparent;color:var(--text)}
 button{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
@@ -31,17 +30,6 @@ nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:60
 .profile-modal .card{width:360px;max-width:95%}
 .pulse{animation:pop .6s ease}
 @keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
-
-/* Progreso */
-.progress-bar{
-  width:100%;background:#eee;border-radius:10px;margin:8px 0;
-  height:20px;overflow:hidden;
-}
-.progress-fill{
-  height:100%;border-radius:10px;background:#28a745;width:0%;
-  text-align:center;color:#fff;font-size:12px;line-height:20px;
-  transition:width 0.8s ease, background-color 0.5s ease;
-}
 </style>
 </head>
 <body>
@@ -92,7 +80,25 @@ nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:60
 <main id="contenido" style="display:none">
   <section id="intro" class="card">
     <h2>Introducción</h2>
-    <p>La contaminación por colillas de cigarro es un problema ambiental global... Participa y ayudanos con la lucha contra la contaminación</p>
+    <p>
+      La contaminación por colillas de cigarro es un problema ambiental global. Cada año se desechan más de 4.5 billones de colillas en el mundo, cuyos filtros de acetato de celulosa liberan microplásticos, nicotina y metales pesados que contaminan el agua, el suelo y afectan a diversas especies.
+    </p>
+    <p>
+      Abordamos la contaminación por colillas mediante un sistema que combina recolección, registro digital y biodegradación fúngica. Para ello instalamos puntos de recolección, una estación de biodegradación con <em>Pleurotus ostreatus</em> y una página web donde los usuarios registran la cantidad de colillas depositadas acumulando puntos como incentivo.
+    </p>
+    <p>
+      El tratamiento inicia cuando las colillas son recuperadas semanalmente. Después, se realiza un secado rápido para reducir los tóxicos superficiales y facilitar la colonización del hongo. El material se mezcla con aserrín humedecido o paja pasteurizada, utilizados como sustratos económicos y compatibles con el crecimiento del micelio.
+    </p>
+    <p>
+      Una vez inoculado, el conjunto se coloca en recipientes plásticos y se incuba de 4 a 8 semanas, periodo en el que <em>Pleurotus ostreatus</em> degrada gradualmente el acetato de celulosa presente en los filtros. Al finalizar, se obtiene una biomasa (no comestible), estable y apta para integrarse a composta no agrícola o para futuras evaluaciones de biodegradabilidad.
+    </p>
+    <p>
+      Este residuo se encuentra en calles, playas, parques e instituciones educativas, debido a la falta de contenedores adecuados y malos hábitos de desecho. Diversos estudios han demostrado que los hongos del género <em>Pleurotus</em> pueden degradar el acetato de celulosa mediante enzimas ligninolíticas y celulasas, reduciendo la toxicidad del residuo.
+    </p>
+    <p>
+      Dado esto, proponemos implementar un sistema de recolección y biodegradación de colillas en la Escuela Nacional de Ciencias Biológicas (ENCB), como un primer espacio para probar el modelo antes de replicarlo en otros planteles del IPN. El sistema propuesto demuestra ser una alternativa económica, viable y sustentable para la recolección y biodegradación de colillas.
+      El uso de <em>Pleurotus ostreatus</em> confirma su eficacia para degradar filtros de acetato de celulosa y reducir su impacto ambiental. La ENCB cuenta con condiciones adecuadas para implementar este proceso y la plataforma web fortalece la participación estudiantil. El proyecto abre oportunidades para nuevas investigaciones en micorremediación y manejo integral de residuos.
+    </p>
   </section>
 
   <section id="registro" class="card">
@@ -104,16 +110,12 @@ nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:60
     </div>
     <p id="saveMsg" class="small"></p>
     <h3>Total acumulado: <span id="totalUser">0</span></h3>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressColillas">0%</div>
-    </div>
-    <p>Rango actual: <span id="badgeRank">Principiante</span> <span id="badgeLevelIcon">🔰</span></p>
     <div id="chartContainer" style="max-width:700px"><canvas id="chartCanvas"></canvas></div>
   </section>
 
   <section id="impacto" class="card">
     <h2>Impacto</h2>
-    <p>Nivel: <span id="badgeLevel">0</span></p>
+    <p>Nivel: <span id="badgeLevel">0</span> — Rango: <span id="badgeRank">Principiante</span></p>
   </section>
 
   <section id="historial" class="card">
@@ -158,260 +160,396 @@ nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:60
   </div>
 </div>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-// -----------------------
-// DB y utilidades
-// -----------------------
+/* -----------------------
+   DB y utilidades
+   ----------------------- */
 const STORAGE_KEY = 'sicceDB_complete_v1';
 let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+
+// crear admin por defecto si no existe
 if(!db['valeriavlv318@gmail.com']){
   db['valeriavlv318@gmail.com'] = { colillas:0, nivel:0, rango:'Administrador', contraseña:'V@leria18', isAdmin:true, historial:[] };
   saveDB();
 }
 
-// -----------------------
-// Refs DOM
-// -----------------------
-const loginScreen=document.getElementById('loginScreen');
-const registroScreen=document.getElementById('registroScreen');
-const menu=document.getElementById('menu');
-const contenido=document.getElementById('contenido');
-const loginEmail=document.getElementById('loginEmail');
-const loginPass=document.getElementById('loginPass');
-const loginMsg=document.getElementById('loginMsg');
-const regEmail=document.getElementById('regEmail');
-const regPass=document.getElementById('regPass');
-const regMsg=document.getElementById('regMsg');
-const btnLogin=document.getElementById('btnLogin');
-const btnShowRegister=document.getElementById('btnShowRegister');
-const btnRegister=document.getElementById('btnRegister');
-const btnCancelRegister=document.getElementById('btnCancelRegister');
-const userLabel=document.getElementById('userLabel');
-const colillasInput=document.getElementById('colillasInput');
-const btnSaveColillas=document.getElementById('btnSaveColillas');
-const saveMsg=document.getElementById('saveMsg');
-const totalUser=document.getElementById('totalUser');
-const badgeLevel=document.getElementById('badgeLevel');
-const badgeRank=document.getElementById('badgeRank');
-const badgeLevelIcon=document.getElementById('badgeLevelIcon');
-const adminBtn=document.getElementById('adminBtn');
-const adminUserSelect=document.getElementById('adminUserSelect');
-const adminDelDate=document.getElementById('adminDelDate');
-const btnAdminDeleteByDate=document.getElementById('btnAdminDeleteByDate');
-const btnAdminDeleteAll=document.getElementById('btnAdminDeleteAll');
-const adminList=document.getElementById('adminList');
-const btnRefreshAdmin=document.getElementById('btnRefreshAdmin');
-const btnExportCSV=document.getElementById('btnExportCSV');
-const btnResetAll=document.getElementById('btnResetAll');
-const btnTheme=document.getElementById('btnTheme');
-const btnProfile=document.getElementById('btnProfile');
-const btnLogout=document.getElementById('btnLogout');
-const profileModal=document.getElementById('profileModal');
-const pEmail=document.getElementById('pEmail');
-const pColillas=document.getElementById('pColillas');
-const pNivel=document.getElementById('pNivel');
-const historialLista=document.getElementById('historialLista');
-const delDate=document.getElementById('delDate');
-const btnDeleteByDate=document.getElementById('btnDeleteByDate');
-const chartCanvas=document.getElementById('chartCanvas');
-let chartInstance=null;
+/* -----------------------
+   Refs DOM
+   ----------------------- */
+const loginScreen = document.getElementById('loginScreen');
+const registroScreen = document.getElementById('registroScreen');
+const menu = document.getElementById('menu');
+const contenido = document.getElementById('contenido');
 
-// -----------------------
-// Eventos
-// -----------------------
+const loginEmail = document.getElementById('loginEmail');
+const loginPass = document.getElementById('loginPass');
+const loginMsg = document.getElementById('loginMsg');
+
+const regEmail = document.getElementById('regEmail');
+const regPass = document.getElementById('regPass');
+const regMsg = document.getElementById('regMsg');
+
+const btnLogin = document.getElementById('btnLogin');
+const btnShowRegister = document.getElementById('btnShowRegister');
+const btnRegister = document.getElementById('btnRegister');
+const btnCancelRegister = document.getElementById('btnCancelRegister');
+
+const userLabel = document.getElementById('userLabel');
+const colillasInput = document.getElementById('colillasInput');
+const btnSaveColillas = document.getElementById('btnSaveColillas');
+const saveMsg = document.getElementById('saveMsg');
+const totalUser = document.getElementById('totalUser');
+
+const badgeLevel = document.getElementById('badgeLevel');
+const badgeRank = document.getElementById('badgeRank');
+
+const adminBtn = document.getElementById('adminBtn');
+const adminUserSelect = document.getElementById('adminUserSelect');
+const adminDelDate = document.getElementById('adminDelDate');
+const btnAdminDeleteByDate = document.getElementById('btnAdminDeleteByDate');
+const btnAdminDeleteAll = document.getElementById('btnAdminDeleteAll');
+const adminList = document.getElementById('adminList');
+const btnRefreshAdmin = document.getElementById('btnRefreshAdmin');
+const btnExportCSV = document.getElementById('btnExportCSV');
+const btnResetAll = document.getElementById('btnResetAll');
+
+const btnTheme = document.getElementById('btnTheme');
+const btnProfile = document.getElementById('btnProfile');
+const btnLogout = document.getElementById('btnLogout');
+
+const profileModal = document.getElementById('profileModal');
+const pEmail = document.getElementById('pEmail');
+const pColillas = document.getElementById('pColillas');
+const pNivel = document.getElementById('pNivel');
+const btnCloseProfile = document.getElementById('btnCloseProfile');
+
+const historialLista = document.getElementById('historialLista');
+const delDate = document.getElementById('delDate');
+const btnDeleteByDate = document.getElementById('btnDeleteByDate');
+
+const chartCanvas = document.getElementById('chartCanvas');
+let chartInstance = null;
+
+/* -----------------------
+   Eventos (wiring)
+   ----------------------- */
 btnShowRegister.addEventListener('click', ()=>{ loginScreen.style.display='none'; registroScreen.style.display='block'; });
 btnCancelRegister.addEventListener('click', ()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; });
 btnRegister.addEventListener('click', registrarUsuario);
 btnLogin.addEventListener('click', login);
+
 btnSaveColillas.addEventListener('click', addColillas);
+
 btnAdminDeleteByDate.addEventListener('click', adminDeleteByDate);
 btnAdminDeleteAll.addEventListener('click', adminDeleteAll);
 btnRefreshAdmin.addEventListener('click', loadAdmin);
 btnExportCSV.addEventListener('click', exportCSV);
 btnResetAll.addEventListener('click', resetAll);
+
 btnTheme.addEventListener('click', toggleTheme);
 btnProfile.addEventListener('click', openProfile);
 btnLogout.addEventListener('click', logout);
+
 btnCloseProfile.addEventListener('click', closeProfile);
 btnDeleteByDate.addEventListener('click', userDeleteByDate);
 
-// -----------------------
-// Registro / Login
-// -----------------------
+/* -----------------------
+   Registro / Login
+   ----------------------- */
 function registrarUsuario(){
-  const email=regEmail.value.trim(); const pass=regPass.value;
-  regMsg.textContent=''; if(!email||!pass){ regMsg.textContent='Completa los campos'; return;}
-  if(db[email]){ regMsg.textContent='Correo ya registrado'; return;}
-  db[email]={colillas:0,nivel:0,rango:'Principiante',contraseña:pass,isAdmin:false,historial:[]};
-  saveDB(); regMsg.textContent='Cuenta creada. Ya puedes iniciar sesión.';
-  setTimeout(()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; loginEmail.value=email;},900);
-}
-function login(){
-  const email=loginEmail.value.trim(); const pass=loginPass.value;
-  loginMsg.textContent=''; if(!email||!pass){ loginMsg.textContent='Completa los campos'; return;}
-  if(!db[email] || db[email].contraseña!==pass){ loginMsg.textContent='Correo o contraseña incorrectos'; return;}
-  sessionStorage.setItem('user', email); iniciarSistema();
+  const email = regEmail.value.trim();
+  const pass = regPass.value;
+  regMsg.textContent = '';
+  if(!email || !pass){ regMsg.textContent = 'Completa los campos'; return; }
+  if(db[email]){ regMsg.textContent = 'Correo ya registrado'; return; }
+  db[email] = { colillas:0, nivel:0, rango:'Principiante', contraseña:pass, isAdmin:false, historial:[] };
+  saveDB();
+  regMsg.textContent = 'Cuenta creada. Ya puedes iniciar sesión.';
+  setTimeout(()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; loginEmail.value = email; }, 900);
 }
 
-// -----------------------
-// Iniciar sistema
-// -----------------------
-function iniciarSistema(){
-  loginScreen.style.display='none'; registroScreen.style.display='none';
-  menu.style.display='flex'; contenido.style.display='block'; loadAdmin();
-  const user=sessionStorage.getItem('user');
-  if(user && db[user] && db[user].isAdmin){ adminBtn.style.display='inline-block'; } 
-  else{ adminBtn.style.display='none'; }
-  cargarUsuario(); renderChart(); renderHistorial();
+function login(){
+  const email = loginEmail.value.trim();
+  const pass = loginPass.value;
+  loginMsg.textContent = '';
+  if(!email || !pass){ loginMsg.textContent = 'Completa los campos'; return; }
+  if(!db[email] || db[email].contraseña !== pass){ loginMsg.textContent = 'Correo o contraseña incorrectos'; return; }
+  sessionStorage.setItem('user', email);
+  iniciarSistema();
 }
+
+/* -----------------------
+   Iniciar sistema / cargar usuario
+   ----------------------- */
+function iniciarSistema(){
+  loginScreen.style.display='none';
+  registroScreen.style.display='none';
+  menu.style.display='flex';
+  contenido.style.display='block';
+  loadAdmin();
+  const user = sessionStorage.getItem('user');
+  if(user && db[user] && db[user].isAdmin){
+    adminBtn.style.display = 'inline-block';
+  } else {
+    adminBtn.style.display = 'none';
+  }
+  cargarUsuario();
+  renderChart();
+  renderHistorial();
+}
+
+/* -----------------------
+   Cargar usuario
+   ----------------------- */
 function cargarUsuario(){
-  const email=sessionStorage.getItem('user'); if(!email) return;
-  userLabel.textContent='Usuario: '+email;
-  totalUser.textContent=(db[email].colillas||0)+' colillas';
+  const email = sessionStorage.getItem('user');
+  if(!email) return;
+  userLabel.textContent = 'Usuario: ' + email;
+  totalUser.textContent = (db[email].colillas || 0) + ' colillas';
   actualizarInsignias(email);
 }
 
-// -----------------------
-// Registrar colillas + historial
-// -----------------------
+/* -----------------------
+   Registrar colillas + historial
+   ----------------------- */
 function addColillas(){
-  const email=sessionStorage.getItem('user'); if(!email){ saveMsg.textContent='Inicia sesión primero'; return;}
-  const cant=parseInt(colillasInput.value,10); saveMsg.textContent='';
-  if(!cant || cant<=0){ saveMsg.textContent='Cantidad inválida'; return;}
-  if(!db[email]) db[email]={colillas:0,nivel:0,rango:'Principiante',contraseña:'',isAdmin:false,historial:[]};
-  db[email].colillas+=cant;
-  const registro={id:'h_'+Date.now()+'_'+Math.floor(Math.random()*9999),fecha:new Date().toLocaleString(),cant:cant};
+  const email = sessionStorage.getItem('user');
+  if(!email){ saveMsg.textContent = 'Inicia sesión primero'; return; }
+  const cant = parseInt(colillasInput.value, 10);
+  saveMsg.textContent = '';
+  if(!cant || cant <= 0){ saveMsg.textContent = 'Cantidad inválida'; return; }
+  if(!db[email]) db[email] = { colillas:0, nivel:0, rango:'Principiante', contraseña:'', isAdmin:false, historial:[] };
+  db[email].colillas += cant;
+  const registro = { id: 'h_'+Date.now()+'_'+Math.floor(Math.random()*9999), fecha: new Date().toLocaleString(), cant: cant };
   db[email].historial.unshift(registro);
-  if(db[email].historial.length>500) db[email].historial.length=500;
+  if(db[email].historial.length > 500) db[email].historial.length = 500;
   saveDB();
-  totalUser.textContent=db[email].colillas+' colillas';
-  saveMsg.textContent='Registrado correctamente';
-  actualizarInsignias(email); renderChart(); renderHistorial(); colillasInput.value='';
+  totalUser.textContent = db[email].colillas + ' colillas';
+  saveMsg.textContent = 'Registrado correctamente';
+  actualizarInsignias(email);
+  renderChart();
+  renderHistorial();
+  colillasInput.value = '';
 }
 
-// -----------------------
-// Historial usuario
-// -----------------------
+/* -----------------------
+   Historial usuario
+   ----------------------- */
 function renderHistorial(){
-  const email=sessionStorage.getItem('user'); historialLista.innerHTML='';
-  if(!email||!db[email]||!db[email].historial||db[email].historial.length===0){
-    historialLista.innerHTML='<li class="small">Sin registros</li>'; return;
+  const email = sessionStorage.getItem('user');
+  historialLista.innerHTML = '';
+  if(!email || !db[email] || !db[email].historial || db[email].historial.length === 0){
+    historialLista.innerHTML = '<li class="small">Sin registros</li>';
+    return;
   }
   db[email].historial.slice(0,100).forEach(it=>{
-    const li=document.createElement('li');
-    li.innerHTML=`${it.fecha} — <strong>${it.cant}</strong> colillas <button style="margin-left:8px" onclick="deleteHist('${it.id}')">🗑</button>`;
+    const li = document.createElement('li');
+    li.innerHTML = `${it.fecha} — <strong>${it.cant}</strong> colillas <button style="margin-left:8px" onclick="deleteHist('${it.id}')">🗑</button>`;
     historialLista.appendChild(li);
   });
 }
+
 function deleteHist(id){
-  const email=sessionStorage.getItem('user'); if(!email) return;
+  const email = sessionStorage.getItem('user');
+  if(!email) return;
   if(!confirm('¿Eliminar este registro?')) return;
-  db[email].historial=db[email].historial.filter(x=>x.id!==id);
-  db[email].colillas=db[email].historial.reduce((s,a)=>s+a.cant,0);
-  saveDB(); cargarUsuario(); renderChart(); renderHistorial();
+  db[email].historial = db[email].historial.filter(x => x.id !== id);
+  db[email].colillas = db[email].historial.reduce((s,a)=>s+a.cant, 0);
+  saveDB();
+  cargarUsuario();
+  renderChart();
+  renderHistorial();
 }
 
-// -----------------------
-// Borrar por fecha usuario
-// -----------------------
+/* -----------------------
+   Borrar por fecha (usuario)
+   ----------------------- */
 function userDeleteByDate(){
-  const email=sessionStorage.getItem('user'); if(!email) return;
-  const fechaSel=delDate.value; if(!fechaSel){ alert('Selecciona una fecha'); return;}
-  const before=db[email].historial.length;
-  db[email].historial=db[email].historial.filter(r=>{
-    const d=new Date(r.fecha); if(isNaN(d)) return true;
-    const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
-    return !(yyyy+'-'+mm+'-'+dd===fechaSel);
+  const email = sessionStorage.getItem('user');
+  if(!email) return;
+  const fechaSel = delDate.value;
+  if(!fechaSel){ alert('Selecciona una fecha'); return; }
+  const before = db[email].historial.length;
+  db[email].historial = db[email].historial.filter(r => {
+    const d = new Date(r.fecha);
+    if (isNaN(d)) return true;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return !(yyyy+'-'+mm+'-'+dd === fechaSel);
   });
-  const removed=before-db[email].historial.length;
-  if(removed>0){ db[email].colillas=db[email].historial.reduce((s,a)=>s+a.cant,0); saveDB(); cargarUsuario(); renderChart(); renderHistorial(); alert('Registros eliminados: '+removed);}
-  else{ alert('No se encontraron registros en esa fecha.');}
+  const removed = before - db[email].historial.length;
+  if(removed>0){
+    db[email].colillas = db[email].historial.reduce((s,a)=>s+a.cant,0);
+    saveDB();
+    cargarUsuario(); renderChart(); renderHistorial();
+    alert('Registros eliminados: '+removed);
+  } else {
+    alert('No se encontraron registros en esa fecha.');
+  }
 }
 
-// -----------------------
-// Insignias / niveles con barra de progreso
-// -----------------------
+/* -----------------------
+   Insignias / niveles
+   ----------------------- */
 function actualizarInsignias(email){
-  const c=db[email].colillas||0;
-  let rango='Principiante', nivel=0, icon='🔰', color='#ffc107';
-  if(c>=300){ nivel=3; rango='Guardián Ambiental'; icon='🏆'; color='#28a745'; }
-  else if(c>=150){ nivel=2; rango='Protector del Campus'; icon='🌿'; color='#17a2b8'; }
-  else if(c>=50){ nivel=1; rango='Recolector Inicial'; icon='🌱'; color='#fd7e14'; }
-  db[email].nivel=nivel; db[email].rango=rango; saveDB();
-  badgeLevel.textContent=nivel; badgeRank.textContent=rango; badgeLevelIcon.textContent=icon;
-  const porcentaje=Math.min(c,300)/300*100;
-  const fill=document.getElementById('progressColillas');
-  fill.style.width=porcentaje+'%'; fill.textContent=Math.floor(porcentaje)+'%'; fill.style.backgroundColor=color;
-  badgeLevel.classList.add('pulse'); badgeRank.classList.add('pulse'); badgeLevelIcon.classList.add('pulse');
-  setTimeout(()=>{ badgeLevel.classList.remove('pulse'); badgeRank.classList.remove('pulse'); badgeLevelIcon.classList.remove('pulse');},700);
+  const c = db[email].colillas || 0;
+  if(c >= 300){ db[email].nivel = 3; db[email].rango = 'Guardián Ambiental'; }
+  else if(c >= 150){ db[email].nivel = 2; db[email].rango = 'Protector del Campus'; }
+  else if(c >= 50){ db[email].nivel = 1; db[email].rango = 'Recolector Inicial'; }
+  else { db[email].nivel = 0; db[email].rango = 'Principiante'; }
+  saveDB();
+  badgeLevel.textContent = db[email].nivel;
+  badgeRank.textContent = db[email].rango;
+  badgeLevel.classList.add('pulse'); badgeRank.classList.add('pulse');
+  setTimeout(()=>{ badgeLevel.classList.remove('pulse'); badgeRank.classList.remove('pulse'); }, 700);
 }
 
-// -----------------------
-// Chart.js
-// -----------------------
+/* -----------------------
+   Chart.js
+   ----------------------- */
 function renderChart(){
-  const email=sessionStorage.getItem('user');
-  const myVal=(email && db[email])? db[email].colillas||0 : 0;
-  const total=Object.values(db).reduce((s,v)=> s+(v.colillas||0),0);
-  const ctx=chartCanvas.getContext('2d');
+  const email = sessionStorage.getItem('user');
+  const myVal = (email && db[email])? db[email].colillas || 0 : 0;
+  const total = Object.values(db).reduce((s,v)=> s + (v.colillas||0), 0);
+  const ctx = chartCanvas.getContext('2d');
   if(chartInstance) chartInstance.destroy();
-  chartInstance=new Chart(ctx,{type:'bar',data:{labels:['Total campus','Tú'],datasets:[{label:'Colillas',data:[total,myVal],backgroundColor:['#7a003c','#2979ff']}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Total campus','Tú'],
+      datasets: [{ label:'Colillas', data:[total,myVal], backgroundColor:['#7a003c','#2979ff'] }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+  });
 }
 
-// -----------------------
-// ADMIN funciones
-// -----------------------
+/* -----------------------
+   ADMIN funciones
+   ----------------------- */
 function loadAdmin(){
-  let html='<table class="table"><thead><tr><th>Usuario</th><th>Colillas</th><th>Nivel</th></tr></thead><tbody>';
-  Object.keys(db).forEach(u=>{ const it=db[u]; html+=`<tr><td>${u}${it.isAdmin?' (admin)':''}</td><td>${it.colillas||0}</td><td>${it.nivel||0} - ${it.rango||''}</td></tr>`; });
-  html+='</tbody></table>'; adminList.innerHTML=html;
-  adminUserSelect.innerHTML=Object.keys(db).map(u=>`<option value="${u}">${u}</option>`).join('');
+  let html = '<table class="table"><thead><tr><th>Usuario</th><th>Colillas</th><th>Nivel</th></tr></thead><tbody>';
+  Object.keys(db).forEach(u=>{
+    const it = db[u];
+    html += `<tr><td>${u}${it.isAdmin? ' (admin)':''}</td><td>${it.colillas||0}</td><td>${it.nivel||0} - ${it.rango||''}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  adminList.innerHTML = html;
+  adminUserSelect.innerHTML = Object.keys(db).map(u => `<option value="${u}">${u}</option>`).join('');
 }
-function adminDeleteByDate(){ const admin=sessionStorage.getItem('user'); if(!admin||!db[admin]||!db[admin].isAdmin){ alert('Solo el administrador'); return;}
-  const target=adminUserSelect.value; const fechaSel=adminDelDate.value;
-  if(!target){ alert('Selecciona usuario'); return;} if(!fechaSel){ alert('Selecciona fecha'); return;}
-  if(!db[target]||!db[target].historial||db[target].historial.length===0){ alert('Usuario sin historial'); return;}
-  const before=db[target].historial.length;
-  db[target].historial=db[target].historial.filter(r=>{const d=new Date(r.fecha); if(isNaN(d)) return true; const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return !(yyyy+'-'+mm+'-'+dd===fechaSel);});
-  const removed=before-db[target].historial.length;
-  db[target].colillas=db[target].historial.reduce((s,a)=>s+a.cant,0); actualizarInsignias(target); saveDB(); loadAdmin(); alert('Registros eliminados: '+removed);}
-function adminDeleteAll(){ const admin=sessionStorage.getItem('user'); if(!admin||!db[admin]||!db[admin].isAdmin){ alert('Solo admin'); return;}
-  const target=adminUserSelect.value; if(!target){ alert('Selecciona usuario'); return;}
+
+function adminDeleteByDate(){
+  const admin = sessionStorage.getItem('user');
+  if(!admin || !db[admin] || !db[admin].isAdmin){ alert('Solo el administrador puede realizar esta acción'); return; }
+  const target = adminUserSelect.value;
+  const fechaSel = adminDelDate.value;
+  if(!target){ alert('Selecciona usuario'); return; }
+  if(!fechaSel){ alert('Selecciona fecha'); return; }
+  if(!db[target] || !db[target].historial || !db[target].historial.length){ alert('Usuario sin historial'); return; }
+  const before = db[target].historial.length;
+  db[target].historial = db[target].historial.filter(r=>{
+    const d = new Date(r.fecha);
+    if(isNaN(d)) return true;
+    const yyyy = d.getFullYear(), mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+    return !(yyyy+'-'+mm+'-'+dd === fechaSel);
+  });
+  const removed = before - db[target].historial.length;
+  db[target].colillas = db[target].historial.reduce((s,a)=>s+a.cant,0);
+  actualizarInsignias(target);
+  saveDB();
+  loadAdmin();
+  alert('Registros eliminados: '+removed);
+}
+
+function adminDeleteAll(){
+  const admin = sessionStorage.getItem('user');
+  if(!admin || !db[admin] || !db[admin].isAdmin){ alert('Solo admin'); return; }
+  const target = adminUserSelect.value;
+  if(!target){ alert('Selecciona usuario'); return; }
   if(!confirm('Borrar TODO el historial del usuario '+target+' ? Esta acción no se puede deshacer.')) return;
-  db[target].historial=[]; db[target].colillas=0; db[target].nivel=0; db[target].rango='Principiante'; saveDB(); loadAdmin(); alert('Historial eliminado para '+target);}
-function exportCSV(){ const admin=sessionStorage.getItem('user'); if(!admin||!db[admin]||!db[admin].isAdmin){ alert('Solo admin'); return;}
-  let csv='usuario,colillas,nivel,rango\n'; for(const u in db){ csv+=`${u},${db[u].colillas||0},${db[u].nivel||0},"${db[u].rango||''}"\n`; }
-  const blob=new Blob([csv],{type:'text/csv'}), url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='sicce_datos.csv'; a.click(); URL.revokeObjectURL(url);}
-function resetAll(){ const admin=sessionStorage.getItem('user'); if(!admin||!db[admin]||!db[admin].isAdmin){ alert('Solo admin'); return;}
+  db[target].historial = [];
+  db[target].colillas = 0;
+  db[target].nivel = 0;
+  db[target].rango = 'Principiante';
+  saveDB();
+  loadAdmin();
+  alert('Historial eliminado para ' + target);
+}
+
+function exportCSV(){
+  const admin = sessionStorage.getItem('user');
+  if(!admin || !db[admin] || !db[admin].isAdmin){ alert('Solo admin'); return; }
+  let csv = 'usuario,colillas,nivel,rango\n';
+  for(const u in db){
+    csv += `${u},${db[u].colillas||0},${db[u].nivel||0},"${db[u].rango||''}"\n`;
+  }
+  const blob = new Blob([csv],{type:'text/csv'}), url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'sicce_datos.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+function resetAll(){
+  const admin = sessionStorage.getItem('user');
+  if(!admin || !db[admin] || !db[admin].isAdmin){ alert('Solo admin'); return; }
   if(!confirm('Reiniciar todos los conteos y historiales?')) return;
-  for(const u in db){ db[u].colillas=0; db[u].nivel=0; db[u].rango=db[u].isAdmin?'Administrador':'Principiante'; db[u].historial=[]; }
-  saveDB(); loadAdmin(); renderChart(); renderHistorial(); alert('Reinicio completo');}
+  for(const u in db){
+    db[u].colillas = 0;
+    db[u].nivel = 0;
+    db[u].rango = db[u].isAdmin? 'Administrador' : 'Principiante';
+    db[u].historial = [];
+  }
+  saveDB();
+  loadAdmin();
+  renderChart();
+  renderHistorial();
+  alert('Reinicio completo');
+}
 
-// -----------------------
-// Perfil modal
-// -----------------------
-function openProfile(){ const email=sessionStorage.getItem('user'); if(!email){ alert('Inicia sesión'); return;}
-  pEmail.textContent='Correo: '+email; pColillas.textContent='Colillas: '+(db[email].colillas||0); pNivel.textContent='Nivel: '+(db[email].nivel||0)+' — '+(db[email].rango||'');
-  profileModal.style.display='flex';}
-function closeProfile(){ profileModal.style.display='none';}
+/* -----------------------
+   Perfil modal
+   ----------------------- */
+function openProfile(){
+  const email = sessionStorage.getItem('user');
+  if(!email){ alert('Inicia sesión'); return; }
+  pEmail.textContent = 'Correo: ' + email;
+  pColillas.textContent = 'Colillas: ' + (db[email].colillas || 0);
+  pNivel.textContent = 'Nivel: ' + (db[email].nivel || 0) + ' — ' + (db[email].rango || '');
+  profileModal.style.display = 'flex';
+}
+function closeProfile(){ profileModal.style.display = 'none'; }
 
-// -----------------------
-// Theme & logout
-// -----------------------
-function toggleTheme(){ if(document.documentElement.getAttribute('data-theme')==='dark'){ document.documentElement.removeAttribute('data-theme'); localStorage.removeItem('sicce_theme_v1'); btnTheme.textContent='Modo oscuro';}
-else{ document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('sicce_theme_v1','dark'); btnTheme.textContent='Modo claro';}}
-function logout(){ sessionStorage.removeItem('user'); menu.style.display='none'; contenido.style.display='none'; loginScreen.style.display='block'; loginEmail.value=''; loginPass.value='';}
+/* -----------------------
+   Theme & logout
+   ----------------------- */
+function toggleTheme(){
+  if(document.documentElement.getAttribute('data-theme') === 'dark'){
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.removeItem('sicce_theme_v1'); btnTheme.textContent = 'Modo oscuro';
+  } else {
+    document.documentElement.setAttribute('data-theme','dark');
+    localStorage.setItem('sicce_theme_v1','dark'); btnTheme.textContent = 'Modo claro';
+  }
+}
+function logout(){
+  sessionStorage.removeItem('user');
+  menu.style.display = 'none';
+  contenido.style.display = 'none';
+  loginScreen.style.display = 'block';
+  loginEmail.value = ''; loginPass.value = '';
+}
 
-// -----------------------
-// Init on load
-// -----------------------
-window.addEventListener('load',()=>{
-  if(localStorage.getItem('sicce_theme_v1')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); btnTheme.textContent='Modo claro';}
-  else{ document.documentElement.removeAttribute('data-theme'); btnTheme.textContent='Modo oscuro';}
-  const user=sessionStorage.getItem('user'); if(user && db[user]){ iniciarSistema();} 
-  else { loginScreen.style.display='block'; registroScreen.style.display='none'; menu.style.display='none'; contenido.style.display='none';}
+/* -----------------------
+   Init on load
+   ----------------------- */
+window.addEventListener('load', ()=>{
+  if(localStorage.getItem('sicce_theme_v1') === 'dark'){ document.documentElement.setAttribute('data-theme','dark'); btnTheme.textContent = 'Modo claro'; }
+  else{ document.documentElement.removeAttribute('data-theme'); btnTheme.textContent = 'Modo oscuro'; }
+  const user = sessionStorage.getItem('user');
+  if(user && db[user]){ iniciarSistema(); }
+  else { loginScreen.style.display = 'block'; registroScreen.style.display='none'; menu.style.display='none'; contenido.style.display='none'; }
 });
 </script>
 </body>
