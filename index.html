@@ -1,36 +1,29 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SICCE – ENCB</title>
-  <style>
-    :root{
-      --primary:#7a003c; --primary-dark:#5a002d; --bg:#f4f4f4; --card:#fff; --text:#222;
-    }
-    [data-theme="dark"]{
-      --bg:#0f1112; --card:#121212; --text:#eee;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
-    header{background:var(--primary);color:#fff;padding:18px;text-align:center}
-    main{max-width:1100px;margin:20px auto;padding:18px;display:none}
-    .card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-    input,select,button,textarea{font-family:inherit;font-size:15px}
-    input,select,textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc;background:transparent;color:var(--text)}
-    button{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
-    button:hover{background:var(--primary-dark)}
-    nav{display:none;background:var(--card);padding:12px;border-radius:10px;margin:0 auto 18px;max-width:1100px;align-items:center;display:flex}
-    nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:600}
-    .small{font-size:13px;color:gray;margin-top:8px}
-    .table-wrap{overflow:auto;max-height:380px;margin-top:12px}
-    .table{width:100%;border-collapse:collapse}
-    .table th,.table td{padding:8px;border-bottom:1px solid rgba(0,0,0,.08);font-size:14px;text-align:left}
-    .profile-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:20px}
-    .profile-modal .card{width:360px;max-width:95%}
-    .pulse{animation:pop .6s ease}
-    @keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SICCE – ENCB</title>
+<style>
+  :root{
+    --primary:#7a003c; --primary-dark:#5a002d; --bg:#f4f4f4; --card:#fff; --text:#222;
+  }
+  [data-theme="dark"]{
+    --bg:#0f1112; --card:#121212; --text:#eee;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
+  header{background:var(--primary);color:#fff;padding:18px;text-align:center}
+  main{max-width:1100px;margin:20px auto;padding:18px;display:none}
+  .card{background:var(--card);padding:18px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  input,select,button,textarea{font-family:inherit;font-size:15px}
+  input,select,textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc;background:transparent;color:var(--text)}
+  button{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+  button:hover{background:var(--primary-dark)}
+  nav{display:none;background:var(--card);padding:12px;border-radius:10px;margin:0 auto 18px;max-width:1100px;align-items:center;display:flex}
+  nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:600}
+  .small{font-size:13px;color:gray;margin-top:8px}
+</style>
 </head>
 <body>
 <header>
@@ -66,72 +59,39 @@
 <nav id="menu" style="display:none">
   <a href="#intro">Introducción</a>
   <a href="#registro">Registrar</a>
-  <a href="#impacto">Impacto</a>
-  <a href="#historial">Historial</a>
-  <a href="#adminPanel" id="adminBtn" style="display:none">Administración</a>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <button id="btnTheme">Modo oscuro</button>
-    <button id="btnProfile">Perfil</button>
     <button id="btnLogout">Salir</button>
   </div>
 </nav>
 
 <!-- MAIN -->
 <main id="contenido" style="display:none">
-  <!-- Secciones iguales a tu HTML anterior -->
+  <section id="intro" class="card">
+    <h2>Introducción</h2>
+    <p>Sistema SICCE para recolección y biodegradación de colillas: registro, historial, recompensas y administración.</p>
+  </section>
 </main>
 
-<!-- Profile modal -->
-<div class="profile-modal" id="profileModal">
-  <div class="card">
-    <h3>Perfil</h3>
-    <p id="pEmail"></p>
-    <p id="pColillas"></p>
-    <p id="pNivel"></p>
-    <div style="display:flex;justify-content:flex-end;margin-top:12px">
-      <button id="btnCloseProfile">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- QR modal -->
-<div class="profile-modal" id="qrModal">
-  <div class="card center">
-    <h3>QR para contenedor</h3>
-    <img id="qrImg" alt="QR" style="width:220px;height:220px">
-    <div style="display:flex;justify-content:center;gap:8px;margin-top:12px">
-      <button id="btnDownloadQR">Descargar</button>
-      <button id="btnCloseQR">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- ESM Supabase -->
 <script type="module">
+  // --- Import ESM Supabase ---
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.32.0/dist/supabase-esm.js';
 
+  // --- Configuración Supabase ---
   const SUPABASE_URL = 'https://xarfnkjrynrlagqbzapb.supabase.co';
   const SUPABASE_ANON_KEY = 'TU_ANON_KEY_AQUI'; // reemplaza por tu key real
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('Supabase inicializado correctamente:', !!supabase);
 
   // --- DOM references ---
   const loginScreen = document.getElementById('loginScreen');
   const registroScreen = document.getElementById('registroScreen');
   const menu = document.getElementById('menu');
   const contenido = document.getElementById('contenido');
-
   const loginEmail = document.getElementById('loginEmail');
   const loginPass = document.getElementById('loginPass');
   const loginMsg = document.getElementById('loginMsg');
-
   const regEmail = document.getElementById('regEmail');
   const regPass = document.getElementById('regPass');
   const regMsg = document.getElementById('regMsg');
-
   const btnLogin = document.getElementById('btnLogin');
   const btnShowRegister = document.getElementById('btnShowRegister');
   const btnRegister = document.getElementById('btnRegister');
@@ -153,18 +113,13 @@
     const email = loginEmail.value.trim();
     const pass = loginPass.value;
     loginMsg.textContent = '';
-
     if(!email || !pass){ loginMsg.textContent = 'Completa los campos'; return; }
-
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
     if(error){ loginMsg.textContent = error.message; return; }
-
     const user = data.user || data.session?.user;
     if(!user){ loginMsg.textContent = 'No se pudo iniciar sesión'; return; }
-
     sessionStorage.setItem('user_id', user.id);
     sessionStorage.setItem('user_email', user.email || '');
-
     iniciarSistema();
   }
 
@@ -173,17 +128,13 @@
     const email = regEmail.value.trim();
     const pass = regPass.value;
     regMsg.textContent = '';
-
     if(!email || !pass){ regMsg.textContent = 'Completa los campos'; return; }
-
     const { data, error } = await supabase.auth.signUp({ email, password: pass });
     if(error){ regMsg.textContent = error.message; return; }
-
     const userId = data.user?.id || data.session?.user?.id;
     if(userId){
       await supabase.from('profiles').insert({ id: userId, email, rango: 'Principiante', colillas: 0 });
     }
-
     regMsg.textContent = 'Cuenta creada correctamente';
     setTimeout(()=>{ 
       registroScreen.style.display='none'; 
@@ -198,7 +149,6 @@
     registroScreen.style.display='none';
     menu.style.display='flex';
     contenido.style.display='block';
-
     const uid = sessionUserId();
     const profile = await fetchProfile(uid);
   }
