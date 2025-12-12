@@ -162,320 +162,123 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Supabase client (usar módulo) -->
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+<!-- Supabase UMD -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.32.0/dist/supabase.min.js"></script>
 
-// --- Configuración Supabase ---
-const SUPABASE_URL = 'https://xarfnkjrynrlagqbzapb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhcmZua2pyeW5ybGFncWJ6YXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0ODUwNTYsImV4cCI6MjA4MTA2MTA1Nn0.XSeaEKlaz7LDFpZt9O1OC0EVQ-W7BFIy3SKtuIg5h1E';
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // --- Configuración Supabase ---
+  const SUPABASE_URL = 'https://xarfnkjrynrlagqbzapb.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhcmZua2pyeW5ybGFncWJ6YXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0ODUwNTYsImV4cCI6MjA4MTA2MTA1Nn0.XSeaEKlaz7LDFpZt9O1OC0EVQ-W7BFIy3SKtuIg5h1E';
+  
+  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // --- DOM references ---
+  const loginScreen = document.getElementById('loginScreen');
+  const registroScreen = document.getElementById('registroScreen');
+  const menu = document.getElementById('menu');
+  const contenido = document.getElementById('contenido');
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPass = document.getElementById('loginPass');
+  const loginMsg = document.getElementById('loginMsg');
 
-// --- DOM references ---
-const loginScreen = document.getElementById('loginScreen');
-const registroScreen = document.getElementById('registroScreen');
-const menu = document.getElementById('menu');
-const contenido = document.getElementById('contenido');
+  const regEmail = document.getElementById('regEmail');
+  const regPass = document.getElementById('regPass');
+  const regMsg = document.getElementById('regMsg');
 
-const loginEmail = document.getElementById('loginEmail');
-const loginPass = document.getElementById('loginPass');
-const loginMsg = document.getElementById('loginMsg');
+  const btnLogin = document.getElementById('btnLogin');
+  const btnShowRegister = document.getElementById('btnShowRegister');
+  const btnRegister = document.getElementById('btnRegister');
+  const btnCancelRegister = document.getElementById('btnCancelRegister');
 
-const regEmail = document.getElementById('regEmail');
-const regPass = document.getElementById('regPass');
-const regMsg = document.getElementById('regMsg');
+  // --- Helpers ---
+  function sessionUserId(){ return sessionStorage.getItem('user_id'); }
+  function sessionUserEmail(){ return sessionStorage.getItem('user_email'); }
 
-const btnLogin = document.getElementById('btnLogin');
-const btnShowRegister = document.getElementById('btnShowRegister');
-const btnRegister = document.getElementById('btnRegister');
-const btnCancelRegister = document.getElementById('btnCancelRegister');
-
-const userLabel = document.getElementById('userLabel');
-const colillasInput = document.getElementById('colillasInput');
-const btnSaveColillas = document.getElementById('btnSaveColillas');
-const btnGenerateQR = document.getElementById('btnGenerateQR');
-const saveMsg = document.getElementById('saveMsg');
-const totalUser = document.getElementById('totalUser');
-
-const badgeLevel = document.getElementById('badgeLevel');
-const badgeRank = document.getElementById('badgeRank');
-
-const adminBtn = document.getElementById('adminBtn');
-const adminUserSelect = document.getElementById('adminUserSelect');
-const adminDelDate = document.getElementById('adminDelDate');
-const btnAdminDeleteByDate = document.getElementById('btnAdminDeleteByDate');
-const btnAdminDeleteAll = document.getElementById('btnAdminDeleteAll');
-const adminList = document.getElementById('adminList');
-const btnRefreshAdmin = document.getElementById('btnRefreshAdmin');
-const btnExportCSV = document.getElementById('btnExportCSV');
-const btnResetAll = document.getElementById('btnResetAll');
-
-const btnTheme = document.getElementById('btnTheme');
-const btnProfile = document.getElementById('btnProfile');
-const btnLogout = document.getElementById('btnLogout');
-
-const profileModal = document.getElementById('profileModal');
-const pEmail = document.getElementById('pEmail');
-const pColillas = document.getElementById('pColillas');
-const pNivel = document.getElementById('pNivel');
-const btnCloseProfile = document.getElementById('btnCloseProfile');
-
-const qrModal = document.getElementById('qrModal');
-const qrImg = document.getElementById('qrImg');
-const btnDownloadQR = document.getElementById('btnDownloadQR');
-const btnCloseQR = document.getElementById('btnCloseQR');
-
-const historialLista = document.getElementById('historialLista');
-const delDate = document.getElementById('delDate');
-const btnDeleteByDate = document.getElementById('btnDeleteByDate');
-
-const chartCanvas = document.getElementById('chartCanvas');
-let chartInstance = null;
-
-// --- Event listeners ---
-btnShowRegister.addEventListener('click', ()=>{ loginScreen.style.display='none'; registroScreen.style.display='block'; });
-btnCancelRegister.addEventListener('click', ()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; });
-btnRegister.addEventListener('click', registrarUsuario);
-btnLogin.addEventListener('click', login);
-
-btnSaveColillas.addEventListener('click', addColillas);
-btnGenerateQR.addEventListener('click', generateQR);
-
-btnAdminDeleteByDate.addEventListener('click', adminDeleteByDate);
-btnAdminDeleteAll.addEventListener('click', adminDeleteAll);
-btnRefreshAdmin.addEventListener('click', loadAdmin);
-btnExportCSV.addEventListener('click', exportCSV);
-btnResetAll.addEventListener('click', resetAll);
-
-btnTheme.addEventListener('click', toggleTheme);
-btnProfile.addEventListener('click', openProfile);
-btnLogout.addEventListener('click', logout);
-
-btnCloseProfile.addEventListener('click', closeProfile);
-btnDownloadQR.addEventListener('click', downloadQR);
-btnCloseQR.addEventListener('click', closeQR);
-
-btnDeleteByDate.addEventListener('click', userDeleteByDate);
-
-// --- Helpers ---
-function sessionUserId(){ return sessionStorage.getItem('user_id'); }
-function sessionUserEmail(){ return sessionStorage.getItem('user_email'); }
-
-// --- Fetch profile ---
-async function fetchProfile(user_id){
-  if(!user_id) return null;
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', user_id).single();
-  if(error) return null;
-  return data;
-}
-
-// --- LOGIN ---
-async function login(){
-  const email = loginEmail.value.trim();
-  const pass = loginPass.value;
-  loginMsg.textContent = '';
-
-  if(!email || !pass){ loginMsg.textContent = 'Completa los campos'; return; }
-
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
-  if(error){ loginMsg.textContent = error.message; return; }
-
-  const user = data.user || data.session?.user;
-  if(!user){ loginMsg.textContent = 'No se pudo iniciar sesión'; return; }
-
-  sessionStorage.setItem('user_id', user.id);
-  sessionStorage.setItem('user_email', user.email || '');
-
-  iniciarSistema();
-}
-
-// --- REGISTRO ---
-async function registrarUsuario(){
-  const email = regEmail.value.trim();
-  const pass = regPass.value;
-  regMsg.textContent = '';
-
-  if(!email || !pass){ regMsg.textContent = 'Completa los campos'; return; }
-
-  const { data, error } = await supabase.auth.signUp({ email, password: pass });
-  if(error){ regMsg.textContent = error.message; return; }
-
-  const userId = data.user?.id || data.session?.user?.id;
-  if(userId){
-    await supabase.from('profiles').insert({ id: userId, email, rango: 'Principiante', colillas: 0 });
+  async function fetchProfile(user_id){
+    if(!user_id) return null;
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user_id).single();
+    if(error) return null;
+    return data;
   }
 
-  regMsg.textContent = 'Cuenta creada correctamente';
-  setTimeout(()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; loginEmail.value = email; }, 900);
-}
+  // --- LOGIN ---
+  async function login(){
+    const email = loginEmail.value.trim();
+    const pass = loginPass.value;
+    loginMsg.textContent = '';
 
-// --- INICIAR SISTEMA ---
-async function iniciarSistema(){
-  loginScreen.style.display='none';
-  registroScreen.style.display='none';
-  menu.style.display='flex';
-  contenido.style.display='block';
+    if(!email || !pass){ loginMsg.textContent = 'Completa los campos'; return; }
 
-  const uid = sessionUserId();
-  const profile = await fetchProfile(uid);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+    if(error){ loginMsg.textContent = error.message; return; }
 
-  if(profile && profile.is_admin) adminBtn.style.display = 'inline-block';
-  else adminBtn.style.display = 'none';
+    const user = data.user || data.session?.user;
+    if(!user){ loginMsg.textContent = 'No se pudo iniciar sesión'; return; }
 
-  await cargarUsuario();
-  renderChart();
-  renderHistorial();
-}
+    sessionStorage.setItem('user_id', user.id);
+    sessionStorage.setItem('user_email', user.email || '');
 
-// --- CARGAR USUARIO ---
-async function cargarUsuario(){
-  const uid = sessionUserId();
-  if(!uid) return;
-
-  const profile = await fetchProfile(uid);
-  if(!profile) return;
-
-  userLabel.textContent = 'Usuario: ' + (profile.email || sessionUserEmail());
-  totalUser.textContent = (profile.colillas || 0) + ' colillas';
-  actualizarInsignias(profile.colillas || 0);
-}
-
-// --- AGREGAR COLILLAS ---
-async function addColillas(){
-  const uid = sessionUserId();
-  if(!uid){ saveMsg.textContent = 'Inicia sesión primero'; return; }
-
-  const cant = parseInt(colillasInput.value, 10);
-  if(!cant || cant <= 0){ saveMsg.textContent = 'Cantidad inválida'; return; }
-
-  const { error: insErr } = await supabase.from('deposits').insert({ user_id: uid, cant });
-  if(insErr){ saveMsg.textContent = 'Error al guardar: ' + insErr.message; return; }
-
-  // recalcular total
-  const { data: rows } = await supabase.from('deposits').select('cant').eq('user_id', uid);
-  const total = (rows||[]).reduce((s,r)=>s+(r.cant||0), 0);
-  await supabase.from('profiles').update({ colillas: total }).eq('id', uid);
-
-  totalUser.textContent = total + ' colillas';
-  saveMsg.textContent = 'Registrado correctamente';
-  actualizarInsignias(total);
-  renderChart();
-  renderHistorial();
-  colillasInput.value = '';
-}
-
-// --- Historial ---
-async function renderHistorial(){
-  const uid = sessionUserId();
-  historialLista.innerHTML = '';
-  if(!uid){ historialLista.innerHTML = '<li class="small">Inicia sesión para ver historial</li>'; return; }
-
-  const { data, error } = await supabase.from('deposits').select('*').eq('user_id', uid).order('created_at', { ascending:false }).limit(200);
-  if(error || !data || data.length===0){ historialLista.innerHTML = '<li class="small">Sin registros</li>'; return; }
-
-  data.forEach(it=>{
-    const li = document.createElement('li');
-    li.innerHTML = `${new Date(it.created_at).toLocaleString()} — <strong>${it.cant}</strong> colillas <button style="margin-left:8px" onclick="window.deleteHistSup('${it.id}')">🗑</button>`;
-    historialLista.appendChild(li);
-  });
-}
-
-// --- Eliminar individual (expuesto globalmente) ---
-window.deleteHistSup = async function(id){
-  if(!confirm('¿Eliminar este registro?')) return;
-  const uid = sessionUserId();
-  if(!uid) return;
-
-  const { error } = await supabase.from('deposits').delete().eq('id', id).eq('user_id', uid);
-  if(error){ alert('Error: '+error.message); return; }
-
-  // recalcular total
-  const { data: rows } = await supabase.from('deposits').select('cant').eq('user_id', uid);
-  const total = (rows||[]).reduce((s,r)=>s+(r.cant||0),0);
-  await supabase.from('profiles').update({ colillas: total }).eq('id', uid);
-
-  cargarUsuario(); renderChart(); renderHistorial();
-}
-
-// --- Borrar por fecha ---
-async function userDeleteByDate(){
-  const uid = sessionUserId();
-  if(!uid) return;
-
-  const fechaSel = delDate.value;
-  if(!fechaSel){ alert('Selecciona una fecha'); return; }
-
-  const { data } = await supabase.from('deposits').select('*').eq('user_id', uid);
-  const toDelete = (data||[]).filter(r=>{
-    const d = new Date(r.created_at);
-    const yyyy = d.getFullYear(), mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
-    return (yyyy+'-'+mm+'-'+dd) === fechaSel;
-  });
-
-  if(toDelete.length===0){ alert('No se encontraron registros en esa fecha.'); return; }
-  if(!confirm('Eliminar '+toDelete.length+' registros?')) return;
-
-  const ids = toDelete.map(r=>r.id);
-  await supabase.from('deposits').delete().in('id', ids);
-
-  const { data: rows } = await supabase.from('deposits').select('cant').eq('user_id', uid);
-  const total = (rows||[]).reduce((s,r)=>s+(r.cant||0),0);
-  await supabase.from('profiles').update({ colillas: total }).eq('id', uid);
-
-  cargarUsuario(); renderChart(); renderHistorial();
-  alert('Registros eliminados: '+toDelete.length);
-}
-
-// --- Insignias ---
-function actualizarInsignias(total){
-  const c = total || 0;
-  let nivel = 0, rango = 'Principiante';
-  if(c>=300){ nivel=3; rango='Guardián Ambiental'; }
-  else if(c>=150){ nivel=2; rango='Protector del Campus'; }
-  else if(c>=50){ nivel=1; rango='Recolector Inicial'; }
-  badgeLevel.textContent = nivel;
-  badgeRank.textContent = rango;
-  badgeLevel.classList.add('pulse'); badgeRank.classList.add('pulse');
-  setTimeout(()=>{ badgeLevel.classList.remove('pulse'); badgeRank.classList.remove('pulse'); }, 700);
-}
-
-// --- Chart ---
-async function renderChart(){
-  const uid = sessionUserId();
-  const { data: allProfiles } = await supabase.from('profiles').select('colillas');
-  const total = (allProfiles||[]).reduce((s,p)=>s+(p.colillas||0),0);
-  const { data: me } = await supabase.from('profiles').select('colillas').eq('id', uid).single();
-  const myVal = me?.colillas || 0;
-
-  const ctx = chartCanvas.getContext('2d');
-  if(chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(ctx, {
-    type:'bar',
-    data:{ labels:['Total campus','Tú'], datasets:[{ label:'Colillas', data:[total,myVal], backgroundColor:['#7a003c','#2979ff'] }] },
-    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
-  });
-}
-
-// --- Resto de funciones Admin, QR, Tema, Logout ---
-// (Se mantienen igual, solo asegúrate que usan sessionUserId() para RLS)
-
-// --- Init ---
-window.addEventListener('load', async ()=>{
-  if(localStorage.getItem('sicce_theme_v1')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); btnTheme.textContent='Modo claro'; }
-  else{ document.documentElement.removeAttribute('data-theme'); btnTheme.textContent='Modo oscuro'; }
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if(session && session.user){
-    sessionStorage.setItem('user_id', session.user.id);
-    sessionStorage.setItem('user_email', session.user.email || '');
     iniciarSistema();
-  } else {
-    loginScreen.style.display='block';
-    registroScreen.style.display='none';
-    menu.style.display='none';
-    contenido.style.display='none';
   }
+
+  // --- REGISTRO ---
+  async function registrarUsuario(){
+    const email = regEmail.value.trim();
+    const pass = regPass.value;
+    regMsg.textContent = '';
+
+    if(!email || !pass){ regMsg.textContent = 'Completa los campos'; return; }
+
+    const { data, error } = await supabase.auth.signUp({ email, password: pass });
+    if(error){ regMsg.textContent = error.message; return; }
+
+    const userId = data.user?.id || data.session?.user?.id;
+    if(userId){
+      await supabase.from('profiles').insert({ id: userId, email, rango: 'Principiante', colillas: 0 });
+    }
+
+    regMsg.textContent = 'Cuenta creada correctamente';
+    setTimeout(()=>{ 
+      registroScreen.style.display='none'; 
+      loginScreen.style.display='block'; 
+      loginEmail.value = email; 
+    }, 900);
+  }
+
+  // --- INICIAR SISTEMA ---
+  async function iniciarSistema(){
+    loginScreen.style.display='none';
+    registroScreen.style.display='none';
+    menu.style.display='flex';
+    contenido.style.display='block';
+
+    const uid = sessionUserId();
+    const profile = await fetchProfile(uid);
+
+    // Aquí agregas lógica para mostrar panel admin si es necesario
+  }
+
+  // --- Event listeners ---
+  btnShowRegister.addEventListener('click', ()=>{ loginScreen.style.display='none'; registroScreen.style.display='block'; });
+  btnCancelRegister.addEventListener('click', ()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; });
+  btnRegister.addEventListener('click', registrarUsuario);
+  btnLogin.addEventListener('click', login);
+
+  // --- Mantener sesión si ya hay ---
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if(session && session.user){
+      sessionStorage.setItem('user_id', session.user.id);
+      sessionStorage.setItem('user_email', session.user.email || '');
+      iniciarSistema();
+    } else {
+      loginScreen.style.display='block';
+      registroScreen.style.display='none';
+      menu.style.display='none';
+      contenido.style.display='none';
+    }
+  });
+
 });
 </script>
 </body>
