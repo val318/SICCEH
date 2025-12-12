@@ -80,11 +80,7 @@ nav a{margin-right:12px;color:var(--primary);text-decoration:none;font-weight:60
 <main id="contenido" style="display:none">
   <section id="intro" class="card">
     <h2>Introducción</h2>
-    <p>La contaminación por colillas de cigarro es un problema ambiental global. Cada año se desechan más de 4.5 billones de colillas en el mundo, cuyos filtros de acetato de celulosa liberan microplásticos, nicotina y metales pesados que contaminan el agua, el suelo y afectan a diversas especies.
-Este residuo se encuentra en calles, playas, parques e instituciones educativas, debido a la falta de contenedores adecuados y malos hábitos de desecho.
-Diversos estudios han demostrado que los hongos del género Pleurotus, (especialmente Pleurotus ostreatus) pueden degradar el acetato de celulosa mediante enzimas ligninolíticas y celulasas, reduciendo la toxicidad del residuo.
-Dado esto, en SICCE proponemos implementar un sistema de recolección y biodegradación de colillas en la Escuela Nacional de Ciencias Biológicas (ENCB), como un primer espacio para probar el modelo antes de replicarlo en otros planteles del IPN y espacios urbanos. 
-    Participa y ayudanos con la lucha contra la contaminación</p>
+    <p>La contaminación por colillas de cigarro es un problema ambiental global... Participa y ayudanos con la lucha contra la contaminación</p>
   </section>
 
   <section id="registro" class="card">
@@ -93,7 +89,6 @@ Dado esto, en SICCE proponemos implementar un sistema de recolección y biodegra
     <input id="colillasInput" type="number" placeholder="Cantidad de colillas">
     <div style="display:flex;gap:8px;margin-top:10px">
       <button id="btnSaveColillas">Guardar</button>
-      <button id="btnGenerateQR">Generar QR</button>
     </div>
     <p id="saveMsg" class="small"></p>
     <h3>Total acumulado: <span id="totalUser">0</span></h3>
@@ -151,27 +146,19 @@ Dado esto, en SICCE proponemos implementar un sistema de recolección y biodegra
   </div>
 </div>
 
-
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-/* -----------------------
-   DB y utilidades
-   ----------------------- */
 const STORAGE_KEY = 'sicceDB_complete_v1';
 let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
 
-// crear admin por defecto si no existe
 if(!db['valeriavlv318@gmail.com']){
   db['valeriavlv318@gmail.com'] = { colillas:0, nivel:0, rango:'Administrador', contraseña:'V@leria18', isAdmin:true, historial:[] };
   saveDB();
 }
 
-/* -----------------------
-   Refs DOM
-   ----------------------- */
 const loginScreen = document.getElementById('loginScreen');
 const registroScreen = document.getElementById('registroScreen');
 const menu = document.getElementById('menu');
@@ -193,7 +180,6 @@ const btnCancelRegister = document.getElementById('btnCancelRegister');
 const userLabel = document.getElementById('userLabel');
 const colillasInput = document.getElementById('colillasInput');
 const btnSaveColillas = document.getElementById('btnSaveColillas');
-const btnGenerateQR = document.getElementById('btnGenerateQR');
 const saveMsg = document.getElementById('saveMsg');
 const totalUser = document.getElementById('totalUser');
 
@@ -220,11 +206,6 @@ const pColillas = document.getElementById('pColillas');
 const pNivel = document.getElementById('pNivel');
 const btnCloseProfile = document.getElementById('btnCloseProfile');
 
-const qrModal = document.getElementById('qrModal');
-const qrImg = document.getElementById('qrImg');
-const btnDownloadQR = document.getElementById('btnDownloadQR');
-const btnCloseQR = document.getElementById('btnCloseQR');
-
 const historialLista = document.getElementById('historialLista');
 const delDate = document.getElementById('delDate');
 const btnDeleteByDate = document.getElementById('btnDeleteByDate');
@@ -233,15 +214,14 @@ const chartCanvas = document.getElementById('chartCanvas');
 let chartInstance = null;
 
 /* -----------------------
-   Eventos (wiring)
-   ----------------------- */
+   Eventos
+----------------------- */
 btnShowRegister.addEventListener('click', ()=>{ loginScreen.style.display='none'; registroScreen.style.display='block'; });
 btnCancelRegister.addEventListener('click', ()=>{ registroScreen.style.display='none'; loginScreen.style.display='block'; });
 btnRegister.addEventListener('click', registrarUsuario);
 btnLogin.addEventListener('click', login);
 
 btnSaveColillas.addEventListener('click', addColillas);
-btnGenerateQR.addEventListener('click', generateQR);
 
 btnAdminDeleteByDate.addEventListener('click', adminDeleteByDate);
 btnAdminDeleteAll.addEventListener('click', adminDeleteAll);
@@ -254,14 +234,11 @@ btnProfile.addEventListener('click', openProfile);
 btnLogout.addEventListener('click', logout);
 
 btnCloseProfile.addEventListener('click', closeProfile);
-btnDownloadQR.addEventListener('click', downloadQR);
-btnCloseQR.addEventListener('click', closeQR);
-
 btnDeleteByDate.addEventListener('click', userDeleteByDate);
 
 /* -----------------------
    Registro / Login
-   ----------------------- */
+----------------------- */
 function registrarUsuario(){
   const email = regEmail.value.trim();
   const pass = regPass.value;
@@ -286,13 +263,13 @@ function login(){
 
 /* -----------------------
    Iniciar sistema / cargar usuario
-   ----------------------- */
+----------------------- */
 function iniciarSistema(){
   loginScreen.style.display='none';
   registroScreen.style.display='none';
   menu.style.display='flex';
   contenido.style.display='block';
-  loadAdmin(); // actualizar admin list & selector
+  loadAdmin();
   const user = sessionStorage.getItem('user');
   if(user && db[user] && db[user].isAdmin){
     adminBtn.style.display = 'inline-block';
@@ -314,7 +291,7 @@ function cargarUsuario(){
 
 /* -----------------------
    Registrar colillas + historial
-   ----------------------- */
+----------------------- */
 function addColillas(){
   const email = sessionStorage.getItem('user');
   if(!email){ saveMsg.textContent = 'Inicia sesión primero'; return; }
@@ -336,8 +313,8 @@ function addColillas(){
 }
 
 /* -----------------------
-   Historial usuario (render + borrar individual)
-   ----------------------- */
+   Historial usuario
+----------------------- */
 function renderHistorial(){
   const email = sessionStorage.getItem('user');
   historialLista.innerHTML = '';
@@ -365,13 +342,12 @@ function deleteHist(id){
 
 /* -----------------------
    Borrar por fecha (usuario)
-   ----------------------- */
+----------------------- */
 function userDeleteByDate(){
   const email = sessionStorage.getItem('user');
   if(!email) return;
-  const fechaSel = delDate.value; // yyyy-mm-dd
+  const fechaSel = delDate.value;
   if(!fechaSel){ alert('Selecciona una fecha'); return; }
-  // our stored fecha is locale string, so compare startsWith of date string in locale? We'll compare by converting dates.
   const before = db[email].historial.length;
   db[email].historial = db[email].historial.filter(r => {
     const d = new Date(r.fecha);
@@ -394,7 +370,7 @@ function userDeleteByDate(){
 
 /* -----------------------
    Insignias / niveles
-   ----------------------- */
+----------------------- */
 function actualizarInsignias(email){
   const c = db[email].colillas || 0;
   if(c >= 300){ db[email].nivel = 3; db[email].rango = 'Guardián Ambiental'; }
@@ -410,7 +386,7 @@ function actualizarInsignias(email){
 
 /* -----------------------
    Chart.js
-   ----------------------- */
+----------------------- */
 function renderChart(){
   const email = sessionStorage.getItem('user');
   const myVal = (email && db[email])? db[email].colillas || 0 : 0;
@@ -429,9 +405,8 @@ function renderChart(){
 
 /* -----------------------
    ADMIN funciones
-   ----------------------- */
+----------------------- */
 function loadAdmin(){
-  // table of users
   let html = '<table class="table"><thead><tr><th>Usuario</th><th>Colillas</th><th>Nivel</th></tr></thead><tbody>';
   Object.keys(db).forEach(u=>{
     const it = db[u];
@@ -439,7 +414,6 @@ function loadAdmin(){
   });
   html += '</tbody></table>';
   adminList.innerHTML = html;
-  // fill selector
   adminUserSelect.innerHTML = Object.keys(db).map(u => `<option value="${u}">${u}</option>`).join('');
 }
 
@@ -450,7 +424,7 @@ function adminDeleteByDate(){
   const fechaSel = adminDelDate.value;
   if(!target){ alert('Selecciona usuario'); return; }
   if(!fechaSel){ alert('Selecciona fecha'); return; }
-  if(!db[target] || !db[target].historial || db[target].historial.length === 0){ alert('Usuario sin historial'); return; }
+  if(!db[target] || !db[target].historial || !db[target].historial.length){ alert('Usuario sin historial'); return; }
   const before = db[target].historial.length;
   db[target].historial = db[target].historial.filter(r=>{
     const d = new Date(r.fecha);
@@ -511,7 +485,7 @@ function resetAll(){
 
 /* -----------------------
    Perfil modal
-   ----------------------- */
+----------------------- */
 function openProfile(){
   const email = sessionStorage.getItem('user');
   if(!email){ alert('Inicia sesión'); return; }
@@ -523,24 +497,8 @@ function openProfile(){
 function closeProfile(){ profileModal.style.display = 'none'; }
 
 /* -----------------------
-   QR generation
-   ----------------------- */
-let lastQR = '';
-function generateQR(){
-  const email = sessionStorage.getItem('user') || 'anon';
-  const container = prompt('Identificador del contenedor (ej. C1, C2):', 'C1');
-  if(!container) return;
-  const payload = JSON.stringify({ action:'register', user: email, container: container, ts: Date.now() });
-  lastQR = 'https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=' + encodeURIComponent(payload);
-  qrImg.src = lastQR;
-  qrModal.style.display = 'flex';
-}
-function closeQR(){ qrModal.style.display = 'none'; }
-function downloadQR(){ if(!lastQR) return; const a = document.createElement('a'); a.href = lastQR; a.download = 'qr_sicce.png'; a.click(); }
-
-/* -----------------------
    Theme & logout
-   ----------------------- */
+----------------------- */
 function toggleTheme(){
   if(document.documentElement.getAttribute('data-theme') === 'dark'){
     document.documentElement.removeAttribute('data-theme');
@@ -560,17 +518,15 @@ function logout(){
 
 /* -----------------------
    Init on load
-   ----------------------- */
+----------------------- */
 window.addEventListener('load', ()=>{
-  // restore theme
   if(localStorage.getItem('sicce_theme_v1') === 'dark'){ document.documentElement.setAttribute('data-theme','dark'); btnTheme.textContent = 'Modo claro'; }
   else{ document.documentElement.removeAttribute('data-theme'); btnTheme.textContent = 'Modo oscuro'; }
 
   const user = sessionStorage.getItem('user');
   if(user && db[user]){ iniciarSistema(); }
-  else { loginScreen.style.display = 'block'; registroScreen.style.display = 'none'; menu.style.display='none'; contenido.style.display='none'; }
+  else { loginScreen.style.display = 'block'; registroScreen.style.display='none'; menu.style.display='none'; contenido.style.display='none'; }
 });
 </script>
 </body>
 </html>
-
