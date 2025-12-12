@@ -116,15 +116,25 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- Configuración Supabase ---
   const SUPABASE_URL = 'https://xarfnkjrynrlagqbzapb.supabase.co';
-  const SUPABASE_ANON_KEY = 'TU_ANON_KEY_AQUI';
+  const SUPABASE_ANON_KEY = 'TU_ANON_KEY_AQUI'; // reemplaza por tu key real
 
-  // Inicialización correcta para UMD 2.x
-  if (typeof Supabase === 'undefined' || typeof Supabase.createClient !== 'function') {
-    console.error('SDK de Supabase no cargado o exportación inesperada.');
+  // --- Inicialización robusta del SDK Supabase (UMD) ---
+  const globalCandidates = [
+    window.supabase,
+    window.Supabase,
+    window.supabaseJs,
+    window.createClient && { createClient: window.createClient }
+  ].filter(Boolean)[0];
+
+  if (!globalCandidates || typeof globalCandidates.createClient !== 'function') {
+    console.error('No se encontró la exportación global de Supabase. Verifica que cargaste correctamente el script UMD y la URL del mismo.');
+    console.info('Network: revisa en DevTools que supabase.min.js cargó con 200 OK.');
+    document.getElementById('loginScreen')?.style?.display = 'block';
     return;
   }
-  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('Supabase cargado:', supabase);
+
+  const supabase = globalCandidates.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log('Supabase inicializado correctamente:', !!supabase);
 
   // --- DOM references ---
   const loginScreen = document.getElementById('loginScreen');
@@ -209,6 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const uid = sessionUserId();
     const profile = await fetchProfile(uid);
+
+    // Aquí puedes agregar lógica para mostrar panel admin si es necesario
   }
 
   // --- Event listeners ---
@@ -230,7 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
       contenido.style.display='none';
     }
   });
-
 });
 </script>
 </body>
